@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>VanDeusen_TechAssessment</title>
+<style>
+    html
+    {
+        font-family: Arial, Helvetica, sans-serif;
+
+    }
+    .ErrorMsg
+    {
+        color:#999;
+        font-size: 18px;
+        font-weight:bold;
+    }
+    ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+         color: #999;
+        opacity: 0.6; /* Firefox */
+    }
+
+    :-ms-input-placeholder { /* Internet Explorer 10-11 */
+        color: #999;
+    }
+
+    ::-ms-input-placeholder { /* Microsoft Edge */
+        color: #999;
+    }
+
+    .flexContainer
+    {
+        display:flex;
+        justify-content: flex-start;
+        width:80%;
+        flex-wrap: wrap;
+        margin:0px auto;
+        
+    }
+    .flexItem
+    {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width:25%;
+        align-content:center;
+    }
+    #movieSearchFields
+    {
+        width:100%;
+        background-color: #fafafa;
+        padding:1.5%;
+        display: flex;
+        flex-wrap: nowrap;
+        flex-direction: row;
+        border:1px solid #e8e8e8;
+        margin-top: 2%;
+        margin-bottom: 2%;
+    }
+    #movieSearchFields input[type="text"]
+    {
+        width:100%;
+        padding: 0.5%;
+        border:1px solid #e8e8e8;
+        font-size: 25px;
+        display: inline-flex;
+    }
+    #movieSearchFields input[type="submit"]
+    {
+        justify-self: center;
+        width:auto;
+        background-color: #e6461a;
+        color:#fff;
+        font-size: 14px;
+        font-weight: normal;
+        border:none;
+        display: inline-flex;
+    }
+    .flexItem div
+    {
+        max-width: 90%;
+        width:90%;
+        text-align: center;
+        margin-bottom: 2%;
+
+    }
+    .flexItem div.movieDetailsWrapper
+    {
+        margin-top: auto;
+    }
+    .flexItem div.movieTitle
+    {
+        font-weight: bold;
+    }
+    .flexItem div.releaseYear::before
+    {
+        content:"Released: ";
+    }
+    .moviePoster img
+    {
+        max-width: 100%;
+        width:100%;
+    }
+    @media only screen and (max-width: 320px)
+    {
+        .flexItem
+        {  
+            width:100%;
+        }
+    }
+    @media only screen and (min-width: 320px) {
+        .flexItem
+        {  
+            width:50%;
+        }
+    }
+    @media only screen and (min-width: 768px){
+        .flexItem
+        {  
+            width:33%;
+        }
+    }
+    @media only screen and (min-width: 1000px){
+        .flexItem
+        {  
+            width:25%;
+        }
+    }
+    @media only screen and (min-width: 1440px) {
+        .flexItem
+        {  
+            width:20%;
+        }
+    }
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+</head>
+<body>
+    <script type="text/javascript">
+        $(document).ready(function()
+        {
+            $('#movieName').keypress(function (e) {
+                if (e.which == 13) {
+                    getMovieData();
+                    e.preventDefault();
+                    return false;  
+                }
+            });
+
+            $("#searchButton").click(function(){
+               getMovieData();
+            });
+
+            function getMovieData()
+            {
+                var enteredMovieName = $("#movieName").val();
+                $("#resultDisplay").html("");
+                $.ajax({
+                    'url':'http://www.omdbapi.com/?s='+enteredMovieName+'&apikey=3f66eca5',
+                    'type':'GET',
+                    'dataType':'JSON',
+                    'error':function(msg){
+                        $("#resultDisplay").html("<div class='ErrorMsg'>Error: "+msg+"</div>");
+                    },
+                    'success':function(data){
+                        if(data != null && data != "" && data != undefined)
+                        {
+                            if(data.Response == "True" && data.Search != null && data.Search != "" && data.Search != undefined)
+                            {  
+                                $.each(data.Search,function(index,value)
+                                {
+                                    formatResultItem(value.Poster, value.Title, value.Year);
+                                });
+                            }
+                            else if(data.Response == "False" && data.Error != null && data.Error != "" && data.Error != undefined)
+                            {
+                                $("#resultDisplay").html("<div class='ErrorMsg'>Error: "+data.Error+"</div>");
+                            }
+                        }
+                    }
+                })
+            }
+
+            function formatResultItem(poster, title, year)
+            {
+                var newItem = "<div class='flexItem'><div class='moviePoster'><img src='"+poster+"' alt='"+title+"'/></div><div class='movieDetailsWrapper'><div class='movieTitle'>"+title+"</div><div class='releaseYear'>"+year+"</div></div></div>"
+                $("#resultDisplay").html($("#resultDisplay").html() + newItem);
+            }
+        });
+    </script>
+<div class="flexContainer">
+    <div id="movieSearchFields">
+        <input type="text" id="movieName" name="movieName" placeholder="Search OMDb">
+        <input id="searchButton" type="submit" value="Search">
+    </div>
+</div>
+<div id="resultDisplay" class="flexContainer"></div>
+</body>
+</html>
